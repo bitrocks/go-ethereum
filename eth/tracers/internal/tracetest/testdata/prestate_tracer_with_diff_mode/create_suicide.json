@@ -80,12 +80,10 @@
         }
       },
       "0x52bc44d5378309ee2abf1539bf71de1b7d7be3b5": {
-        "balance": "0xbf681825be002ac452",
-        "nonce": 28922
+        "balance": "0xbf681825be002ac452"
       },
       "0x82effbaaaf28614e55b2ba440fb198e0e5789b0f": {
-        "balance": "0xb3d0ac5cb94df6f6b0",
-        "nonce": 1
+        "balance": "0xb3d0ac5cb94df6f6b0"
       }
     },
     "post": {
