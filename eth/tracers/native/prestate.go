@@ -182,6 +182,7 @@ func (t *prestateTracer) CaptureTxEnd(restGas uint64) {
 			continue
 		}
 		modified := false
+		preAccount := &account{Storage: make(map[common.Hash]common.Hash)}
 		postAccount := &account{Storage: make(map[common.Hash]common.Hash)}
 		newBalance := t.env.StateDB.GetBalance(addr)
 		newNonce := t.env.StateDB.GetNonce(addr)
@@ -189,36 +190,31 @@ func (t *prestateTracer) CaptureTxEnd(restGas uint64) {
 
 		if newBalance.Cmp(t.pre[addr].Balance) != 0 {
 			modified = true
+			preAccount.Balance = t.pre[addr].Balance
 			postAccount.Balance = newBalance
 		}
 		if newNonce != t.pre[addr].Nonce {
 			modified = true
+			preAccount.Nonce = t.pre[addr].Nonce
 			postAccount.Nonce = newNonce
 		}
 		if !bytes.Equal(newCode, t.pre[addr].Code) {
 			modified = true
+			preAccount.Code = t.pre[addr].Code
 			postAccount.Code = newCode
 		}
 
 		for key, val := range state.Storage {
-			// don't include the empty slot
-			if val == (common.Hash{}) {
-				delete(t.pre[addr].Storage, key)
-			}
-
 			newVal := t.env.StateDB.GetState(addr, key)
-			if val == newVal {
-				// Omit unchanged slots
-				delete(t.pre[addr].Storage, key)
-			} else {
+			if val != newVal {
 				modified = true
-				if newVal != (common.Hash{}) {
-					postAccount.Storage[key] = newVal
-				}
+				preAccount.Storage[key] = val
+				postAccount.Storage[key] = newVal
 			}
 		}
 
 		if modified {
+			t.pre[addr] = preAccount
 			t.post[addr] = postAccount
 		} else {
 			// if state is not modified, then no need to include into the pre state
